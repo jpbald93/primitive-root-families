@@ -1,7 +1,9 @@
 #!/bin/bash
 # Gate for the Lean formalisation. It passes only if all of these hold:
 #  * the sources contain no `sorry`, `admit`, `native_decide`, `axiom` keyword (anywhere,
-#    including one on a line of its own), `#eval`, `run_cmd`, `initialize`, `IO`, or `debug.` option;
+#    including one on a line of its own), `#eval`, `run_cmd`, `initialize`, `IO`, `set_option`,
+#    or syntax-extension commands (`macro`, `elab`, `syntax`, `notation`, `import Lean`, ...),
+#    which could redefine `#print axioms`;
 #  * the library builds without errors;
 #  * the gate itself (not a file in the repo) generates the `#print axioms` report for each
 #    REQUIRED theorem, and each report is present exactly once;
@@ -10,10 +12,10 @@
 export PATH="$HOME/.elan/bin:$PATH"
 cd "$(dirname "$0")" || exit 1
 NS="PrimitiveRootFamilies"
-REQUIRED="chebyshev_residues not_dvd_9999 legendreSym_five_four_eq_one ten_isPrimitiveRoot"
+REQUIRED="isPrimitiveRoot_iff_of_eq_four_mul_add_one legendreSym_ten_of_eq_four_mul_add_one isPrimitiveRoot_ten_iff_mod_five_eq_two isPrimitiveRoot_ten_of_mod_five_eq_two"
 SOURCES="PrimitiveRootFamilies/*.lean PrimitiveRootFamilies.lean"
 [ -e .lake/packages/mathlib ] || lake exe cache get || { echo "FAIL: could not fetch Mathlib cache"; exit 1; }
-if grep -nE "\bsorry\b|\badmit\b|native_decide|\baxiom\b|#eval|\brun_cmd\b|\binitialize\b|\bIO\b|\bdebug\." $SOURCES; then
+if grep -nE "\bsorry\b|\badmit\b|native_decide|\baxiom\b|#eval|\brun_cmd\b|\binitialize\b|\bIO\b|\bdebug\.|\bmacro|\belab|\bsyntax\b|\bnotation\b|\binfix|\bprefix\b|\bpostfix\b|import Lean|open Lean|\bset_option\b" $SOURCES; then
   echo "FAIL: forbidden token"; exit 1; fi
 build=$(lake build $NS 2>&1); bstatus=$?
 printf '%s\n' "$build" | tail -3
