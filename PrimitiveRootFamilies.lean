@@ -1,1 +1,2 @@
 import PrimitiveRootFamilies.Chebyshev
+import PrimitiveRootFamilies.SafePrime

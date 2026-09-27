@@ -7,12 +7,16 @@
 #  * the library builds without errors;
 #  * the gate itself (not a file in the repo) generates the `#print axioms` report for each
 #    REQUIRED theorem, and each report is present exactly once;
-#  * every theorem depends only on Lean's standard axioms (propext, Classical.choice, Quot.sound).
+#  * each REQUIRED theorem (with its transitive dependencies) uses only Lean's standard axioms
+#    (propext, Classical.choice, Quot.sound).
+# Trust boundary: the token filter is a heuristic over the project's .lean sources. The gate assumes
+# the pinned toolchain, Mathlib and lake configuration are unmodified. It is not a sandbox, and it
+# does not audit declarations other than the REQUIRED theorems.
 # Lean wraps long axiom lists across several lines, so the output is flattened before parsing.
 export PATH="$HOME/.elan/bin:$PATH"
 cd "$(dirname "$0")" || exit 1
 NS="PrimitiveRootFamilies"
-REQUIRED="isPrimitiveRoot_iff_of_eq_four_mul_add_one legendreSym_ten_of_eq_four_mul_add_one isPrimitiveRoot_ten_iff_mod_five_eq_two isPrimitiveRoot_ten_of_mod_five_eq_two"
+REQUIRED="isPrimitiveRoot_iff_of_eq_four_mul_add_one legendreSym_ten_of_eq_four_mul_add_one isPrimitiveRoot_ten_iff_mod_five_eq_two isPrimitiveRoot_ten_of_mod_five_eq_two isPrimitiveRoot_iff_of_eq_two_mul_add_one isPrimitiveRoot_of_legendreSym_eq_neg_one prime_of_isLeast_isPrimitiveRoot isPrimitiveRoot_two_of_mod_four_eq_one exists_isLeast_isPrimitiveRoot exists_isLeast_isPrimitiveRoot_and_prime"
 SOURCES="PrimitiveRootFamilies/*.lean PrimitiveRootFamilies.lean"
 [ -e .lake/packages/mathlib ] || lake exe cache get || { echo "FAIL: could not fetch Mathlib cache"; exit 1; }
 if grep -nE "\bsorry\b|\badmit\b|native_decide|\baxiom\b|#eval|\brun_cmd\b|\binitialize\b|\bIO\b|\bdebug\.|\bmacro|\belab|\bsyntax\b|\bnotation\b|\binfix|\bprefix\b|\bpostfix\b|import Lean|open Lean|\bset_option\b" $SOURCES; then
@@ -20,7 +24,7 @@ if grep -nE "\bsorry\b|\badmit\b|native_decide|\baxiom\b|#eval|\brun_cmd\b|\bini
 build=$(lake build $NS 2>&1); bstatus=$?
 printf '%s\n' "$build" | tail -3
 [ "$bstatus" -eq 0 ] || { printf '%s\n' "$build"; echo "FAIL: build"; exit 1; }
-# The axiom report is generated here, so no file in the repo can fake it.
+# The `#print axioms` queries are generated here rather than read from a file in the repo.
 chk=$(mktemp --suffix=.lean -p . .gatecheck_XXXX)
 trap 'rm -f "$chk"' EXIT
 { echo "import $NS"; for t in $REQUIRED; do echo "#print axioms $NS.$t"; done; } > "$chk"
