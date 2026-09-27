@@ -71,6 +71,8 @@ A *safe prime* is a prime `p = 2q + 1` with `q` also prime.
   - an axiom, including one whose keyword sits on a line of its own;
   - fake axiom reports printed with `#eval`, or produced by a `macro_rules` that redefines `#print axioms`;
   - an extra axiom hidden on a wrapped output line.
+- `bash tests/tamper.sh` reruns those tampering tests automatically. Each test copies the repository to a scratch directory, plants one defect and checks that the gate fails at the expected stage (source filter, build, or axiom check). The real repository is never modified. Six tests: `sorry`, a two-line `axiom`, a fake `#eval` report, a `macro_rules` forgery of `#print axioms`, a false hypothesis (`p % 5 = 3`), and an extra axiom on a wrapped output line. The wrapped-line test switches off the source filter's `axiom` check in its copy of the gate, so that it exercises the output parser alone. The first four need no build; the last two each rebuild the library.
+
 - `python3 code/check_family.py 200000` is an independent numerical cross-check. For all 1916 prime pairs `(p, 4p + 1)` with `p ≤ 200000`, it confirms that 10 is a primitive root modulo `4p + 1` exactly when `p ≡ 2 (mod 5)`: 628 pairs meet the congruence. As a control, it exhibits a failure when `p` is not prime (`p = 22`).
 
 - `python3 code/check_safe_primes.py 1000000` is an independent numerical cross-check of Part 2:
