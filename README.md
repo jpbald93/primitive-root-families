@@ -2,7 +2,7 @@
 
 Machine-checked proofs, in Lean 4 with Mathlib, of classical elementary results about when a fixed integer is a primitive root modulo a prime.
 
-**Status:** work in progress. Part 1 (Chebyshev's base-10 family) and Part 2 (safe primes) are complete.
+**Status:** complete. Part 1 (Chebyshev's base-10 family), Part 2 (safe primes) and Part 3 (a general criterion for primes `2^k l + 1`) are formalised: 17 named theorems, all checked by `gate.sh`.
 
 ## Part 1: Chebyshev's base-10 family
 **Theorem (Chebyshev).** If `p` and `q = 4p + 1` are both prime and `p ≡ 2 (mod 5)`, then `10` is a primitive root modulo `q`.
@@ -58,14 +58,31 @@ A *safe prime* is a prime `p = 2q + 1` with `q` also prime.
 
 **Checked in Lean:** `2` is a primitive root modulo the safe prime `11 = 2 · 5 + 1`.
 
+## Part 3: the general criterion for primes `2^k l + 1`
+Let `l` be an odd prime, `k ≥ 1`, and `p = 2^k l + 1` prime. Then `p − 1` has exactly the prime divisors `2` and `l`, and a nonzero `a` is a primitive root modulo `p` **exactly when** `(a | p) = −1` and `a^(2^k) ≢ 1 (mod p)`. The criteria of Parts 1 and 2 are equivalent, via Euler's criterion, to its cases `k = 2` and `k = 1`, apart from the safe prime `p = 5`.
+
+Lean statements are in [`PrimitiveRootFamilies/General.lean`](PrimitiveRootFamilies/General.lean):
+
+| Lean name | Statement |
+|---|---|
+| `isPrimitiveRoot_iff_of_eq_two_pow_mul_add_one` | the criterion above, for integer `a` with `(a : ZMod p) ≠ 0` |
+| `isPrimitiveRoot_of_legendreSym_eq_neg_one_of_not_dvd` | sufficient form: `(a \| p) = −1` and `p ∤ a^(2^k) − 1` |
+| `isPrimitiveRoot_two_of_eq_four_mul_add_one` | if `l` and `p = 4l + 1` are prime, `2` is a primitive root modulo `p` |
+| `isPrimitiveRoot_three_of_eq_eight_mul_add_one` | if `l` and `p = 8l + 1` are prime and `l ≠ 5`, `3` is a primitive root modulo `p` |
+| `isPrimitiveRoot_three_of_eq_sixteen_mul_add_one` | if `l` and `p = 16l + 1` are prime, `3` is a primitive root modulo `p` |
+| `isPrimitiveRoot_iff_of_eq_two_mul_add_one'` | the case `k = 1` (odd `l`) |
+| `isPrimitiveRoot_iff_of_eq_four_mul_add_one'` | the case `k = 2` |
+
+The exception `l = 5` is real: `3` is not a primitive root modulo `41 = 8 · 5 + 1` (its order is `8`). This is checked in Lean as an `example`. The `4l + 1` family is Burton, *Elementary Number Theory*, §9.2, Problem 11(b); the others are elementary applications of the same method. None of these is claimed as new.
+
 ## Verification
 - `bash gate.sh` does the following, in order:
   - a heuristic source filter: the project's `.lean` files contain no `sorry`, `admit`, `native_decide`, `axiom` keyword, `#eval`, `run_cmd`, `initialize`, `IO` or `set_option`, and no syntax-extension commands (`macro`, `elab`, `syntax`, `notation`, `import Lean`, …) that could redefine `#print axioms`;
   - it builds the library;
   - the gate writes its own `#print axioms` check for each named theorem, rather than trusting a report printed by a file in the repo;
-  - each of the ten named theorems (four in Part 1, six in Part 2), together with everything it depends on, uses only Lean's standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
+  - each of the seventeen named theorems (four in Part 1, six in Part 2, seven in Part 3), together with everything it depends on, uses only Lean's standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
 - **Trust boundary:** the gate assumes the pinned Lean toolchain, Mathlib version and lake configuration are unmodified. It is not a sandbox or an integrity check for those, and it checks the named theorems only, not every declaration in the files.
-- Output: `PASS (10 theorems, standard axioms only)`.
+- Output: `PASS (17 theorems, standard axioms only)`.
 - The gate has been negative-tested. It fails, as it should, when any of these is added:
   - a `sorry`;
   - an axiom, including one whose keyword sits on a line of its own;
@@ -80,6 +97,14 @@ A *safe prime* is a prime `p = 2q + 1` with `q` also prime.
   - for the 2133 of them with `q ≡ 1 (mod 4)`, `2` is a primitive root;
   - for the 72 safe primes below 5000, brute-force order computations confirm that each of the 73514 nonresidues `x` with `1 < x < p − 1` is a primitive root.
   - As a control, the least primitive root of `p = 41`, which is not a safe prime, is `6`, a composite number.
+
+- `python3 code/check_general.py` is a numerical cross-check of Part 3, for primes `p = 2^k l + 1 ≤ 2000000` with `l` an odd prime:
+  - for 16563 such primes and 11 bases `a ∈ {2, 3, 5, 6, 7, 10, 11, 12, −1, −2, −3}`, the criterion agrees with SymPy's primitive-root test in all 182191 cases. SymPy uses the same prime-divisor method, so as an independent control the 1219 cases with `p < 3000` are also checked by brute-force order computation;
+  - `2` is a primitive root modulo all 4109 primes `4l + 1`, and `3` modulo all 1181 primes `16l + 1`;
+  - among the 2158 primes `8l + 1`, the only failure for `3` is `p = 41`.
+
+## Paper
+A paper describing this formalisation, *Primitive roots modulo primes 2^k l + 1, formalised in Lean 4*, is in preparation for submission to the *Annals of Formalized Mathematics*.
 
 ## Build
 ```sh
