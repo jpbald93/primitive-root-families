@@ -16,7 +16,7 @@
 export PATH="$HOME/.elan/bin:$PATH"
 cd "$(dirname "$0")" || exit 1
 NS="PrimitiveRootFamilies"
-REQUIRED="isPrimitiveRoot_iff_of_eq_four_mul_add_one legendreSym_ten_of_eq_four_mul_add_one isPrimitiveRoot_ten_iff_mod_five_eq_two isPrimitiveRoot_ten_of_mod_five_eq_two isPrimitiveRoot_iff_of_eq_two_mul_add_one isPrimitiveRoot_of_legendreSym_eq_neg_one prime_of_isLeast_isPrimitiveRoot isPrimitiveRoot_two_of_mod_four_eq_one exists_isLeast_isPrimitiveRoot exists_isLeast_isPrimitiveRoot_and_prime"
+REQUIRED="isPrimitiveRoot_iff_of_eq_four_mul_add_one legendreSym_ten_of_eq_four_mul_add_one isPrimitiveRoot_ten_iff_mod_five_eq_two isPrimitiveRoot_ten_of_mod_five_eq_two isPrimitiveRoot_iff_of_eq_two_mul_add_one isPrimitiveRoot_of_legendreSym_eq_neg_one prime_of_isLeast_isPrimitiveRoot isPrimitiveRoot_two_of_mod_four_eq_one exists_isLeast_isPrimitiveRoot exists_isLeast_isPrimitiveRoot_and_prime isPrimitiveRoot_iff_of_eq_two_pow_mul_add_one isPrimitiveRoot_of_legendreSym_eq_neg_one_of_not_dvd isPrimitiveRoot_two_of_eq_four_mul_add_one isPrimitiveRoot_three_of_eq_eight_mul_add_one isPrimitiveRoot_three_of_eq_sixteen_mul_add_one isPrimitiveRoot_iff_of_eq_two_mul_add_one' isPrimitiveRoot_iff_of_eq_four_mul_add_one'"
 SOURCES="PrimitiveRootFamilies/*.lean PrimitiveRootFamilies.lean"
 [ -e .lake/packages/mathlib ] || lake exe cache get || { echo "FAIL: could not fetch Mathlib cache"; exit 1; }
 if grep -nE "\bsorry\b|\badmit\b|native_decide|\baxiom\b|#eval|\brun_cmd\b|\binitialize\b|\bIO\b|\bdebug\.|\bmacro|\belab|\bsyntax\b|\bnotation\b|\binfix|\bprefix\b|\bpostfix\b|import Lean|open Lean|\bset_option\b" $SOURCES; then
