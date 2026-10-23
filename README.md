@@ -2,7 +2,7 @@
 
 Machine-checked proofs, in Lean 4 with Mathlib, of classical elementary results about when a fixed integer is a primitive root modulo a prime.
 
-**Status:** complete. Part 1 (Chebyshev's base-10 family), Part 2 (safe primes) and Part 3 (a general criterion for primes `2^k l + 1`) are formalised: 17 named theorems, all checked by `gate.sh`.
+**Status:** complete. Part 1 (Chebyshev's base-10 family), Part 2 (safe primes) and Part 3 (a general criterion for primes `2^k l + 1`) are formalised: 17 named theorems. With the Layer 14 and 15 files (below), `gate.sh` checks 83 theorems.
 
 ## Part 1: Chebyshev's base-10 family
 **Theorem (Chebyshev).** If `p` and `q = 4p + 1` are both prime and `p ≡ 2 (mod 5)`, then `10` is a primitive root modulo `q`.
@@ -75,14 +75,19 @@ Lean statements are in [`PrimitiveRootFamilies/General.lean`](PrimitiveRootFamil
 
 The exception `l = 5` is real: `3` is not a primitive root modulo `41 = 8 · 5 + 1` (its order is `8`). This is checked in Lean as an `example`. The `4l + 1` family is Burton, *Elementary Number Theory*, §9.2, Problem 11(b); the others are elementary applications of the same method. None of these is claimed as new.
 
+## Layers 14 and 15
+[`PrimitiveRootFamilies/L14.lean`](PrimitiveRootFamilies/L14.lean) has 36 theorems. For each of the 18 statements it covers, an `l14_*` theorem restates it using only Mathlib notions (`Nat.Prime`, `orderOf`, `jacobiSym`), and an `l14w_*` theorem gives an explicit instance satisfying all the hypotheses. Each instance shows the conclusion is not vacuous: for an iff, both truth values occur.
+
+[`PrimitiveRootFamilies/L15Classical.lean`](PrimitiveRootFamilies/L15Classical.lean) compares the development with 26 classical statements, namespace `PrimitiveRootFamilies.Classical`. The statements were written independently, from textbook sources, by an AI model that did not see this code, and are reproduced verbatim. The file proves 25 of them in full and one in part (26 `cov_*` theorems), for 30 gated theorems in all. One writer statement is false as written: Wertheim's criterion for `p = 2^k q^l + 1` with the condition `a^(2^k) ≢ 1` fails for `l ≥ 2` (`not_classical_Prime3_c`, counterexample `p = 19`, `a = 8`). The corrected condition `a^(2^k q^(l-1)) ≢ 1` is proved as `new_Prime3_c_corrected`. The case `l = 1`, which is the criterion of Part 3, is correct.
+
 ## Verification
 - `bash gate.sh` does the following, in order:
   - a heuristic source filter: the project's `.lean` files contain no `sorry`, `admit`, `native_decide`, `axiom` keyword, `#eval`, `run_cmd`, `initialize`, `IO` or `set_option`, and no syntax-extension commands (`macro`, `elab`, `syntax`, `notation`, `import Lean`, …) that could redefine `#print axioms`;
   - it builds the library;
   - the gate writes its own `#print axioms` check for each named theorem, rather than trusting a report printed by a file in the repo;
-  - each of the seventeen named theorems (four in Part 1, six in Part 2, seven in Part 3), together with everything it depends on, uses only Lean's standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
+  - each of the 83 named theorems (the seventeen main theorems, four in Part 1, six in Part 2 and seven in Part 3; 36 in Layer 14; 30 in Layer 15), together with everything it depends on, uses only Lean's standard axioms (`propext`, `Classical.choice`, `Quot.sound`).
 - **Trust boundary:** the gate assumes the pinned Lean toolchain, Mathlib version and lake configuration are unmodified. It is not a sandbox or an integrity check for those, and it checks the named theorems only, not every declaration in the files.
-- Output: `PASS (17 theorems, standard axioms only)`.
+- Output: `PASS (83 theorems, standard axioms only)`.
 - The gate has been negative-tested. It fails, as it should, when any of these is added:
   - a `sorry`;
   - an axiom, including one whose keyword sits on a line of its own;
